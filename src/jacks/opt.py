@@ -1,5 +1,4 @@
 from MDC.jacks import jax
-import jax
 import optax
 
 def optaximiser(obj, thresh=None, num_iters=1_000, optimizer=optax.adam(learning_rate=1e-2), vb=False, jit=True, vb_interval=100):

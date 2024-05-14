@@ -33,8 +33,8 @@ def hank(X, lags, include_tt=True):
         X = X[:, None]
     N = X.shape[0]
     lags = get_lags(lags, X.shape, include_tt)
-    Dh = sum([len(l) for l in lags])
-    off = N - max([max(l) if len(l) > 0 else 0 for l in lags])
+    Dh = sum([len(ll) for ll in lags])
+    off = N - max([max(ll) if len(ll) > 0 else 0 for ll in lags])
     H = np.zeros((off, Dh))
     for i in range(H.shape[0]):
         idx = 0
@@ -64,7 +64,7 @@ def marvin(H, Y, ylags, pred):
     ylags = get_lags(ylags, Y.shape, False)
     YMPO = Y.copy()
     Htt = H.copy()
-    off = max([max(l) if len(l) > 0 else 0 for l in ylags])
+    off = max([max(ll) if len(ll) > 0 else 0 for ll in ylags])
     for i in range(len(H)):
         idx = 0
         for d, lag in enumerate(ylags):
