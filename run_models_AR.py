@@ -2,14 +2,18 @@
 import json
 from copy import deepcopy as dc
 
+import numpy as np
+import matplotlib.pyplot as plt
+
+
 import jax
 import jax.numpy as jnp
-from MDC import np, plt, polys
-from MDC.hank import NARXify, predict
-from MDC.jacks import jeep, opt
-from MDC.linalg import stable_least_squares as SLS
-from MDC.metrics import AIC, nmse, rmse
-from MDC.tricks import timer
+from src import polys
+from src.hank import NARXify, predict
+from src.jacks import jeep, opt
+from src.linalg import stable_least_squares as SLS
+from src.metrics import AIC, nmse, rmse
+from src.tricks import timer
 from sklearn.preprocessing import StandardScaler as SS
 
 from data import benchmarks_tvt

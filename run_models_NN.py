@@ -1,5 +1,5 @@
 # %%
-
+import os
 import json
 
 from copy import deepcopy as dc
@@ -71,6 +71,7 @@ models = {
 
 # %% Set or infer from batch job arrays
 
+# if SLURM job
 # AR_ID = int(os.environ["SLURM_ARRAY_TASK_ID"])
 # n = len(models)
 # i, j = AR_ID // n, AR_ID % n
@@ -87,12 +88,12 @@ print(benchmark, model)
 
 
 config = {"LR": 1e-3, 
-        #   "n_re": 10, 
-        #   "n_hs": [2, 4, 8, 16, 32], 
-        #   "n_look": [2, 4, 8, 16, 32]}
-          "n_re": 1,       # testing
-          "n_hs": [8],     # testing
-          "n_look": [8]}  # testing
+          "n_re": 10, 
+          "n_hs": [2, 4, 8, 16, 32], 
+          "n_look": [2, 4, 8, 16, 32]}
+        #   "n_re": 1,       # testing
+        #   "n_hs": [8],     # testing
+        #   "n_look": [8]}  # testing
 
 opts = {
     "CED1": {
