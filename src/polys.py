@@ -1,5 +1,12 @@
-from MDC import np
-from MDC.tricks import multicomb
+from itertools import chain, combinations_with_replacement
+import numpy as np
+
+def multicomb(iterable, r, empty=False):
+    s = list(iterable)
+    gen = chain.from_iterable(combinations_with_replacement(s, r) for r in range(r + 1))
+    if not empty:
+        _ = gen.__next__()  # exclude empty set
+    return gen
 
 
 def hermite_e(n):
