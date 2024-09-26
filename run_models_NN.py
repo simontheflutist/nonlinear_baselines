@@ -12,11 +12,11 @@ from flax.linen.module import nowrap
 
 from sklearn.preprocessing import MinMaxScaler as MM
 
-from MDC import plt
-from MDC.hank import NARXify
-from MDC.jacks import opt
-from MDC.metrics import rmse
-from MDC.tricks import timer
+import matplotlib.pyplot as plt
+from src.hank import NARXify
+from src.jacks import opt
+from src.metrics import rmse
+from src.tricks import timer
 
 import data
 key = jax.random.PRNGKey(0)
