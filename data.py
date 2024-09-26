@@ -1,7 +1,7 @@
 # %%
 import nonlinear_benchmarks as nlb
-from MDC import np, plt
-
+import numpy as np
+import matplotlib.pyplot as plt
 
 def plot_split(name, data):
     print(name)
