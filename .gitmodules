@@ -1,0 +1,3 @@
+[submodule "nonlinear_benchmarks"]
+	path = nonlinear_benchmarks
+	url = git@github.com:MaartenSchoukens/nonlinear_benchmarks.git

@@ -1,4 +1,6 @@
 # %%
+import sys
+sys.path.append("nonlinear_benchmarks")
 import nonlinear_benchmarks as nlb
 import numpy as np
 import matplotlib.pyplot as plt
