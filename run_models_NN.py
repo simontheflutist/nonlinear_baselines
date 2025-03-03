@@ -1,24 +1,22 @@
 # %%
-import os
 import json
-
+import os
 from copy import deepcopy as dc
 
 import jax
+import matplotlib.pyplot as plt
 import optax
-from jax import numpy as jnp
 from flax import linen as nn
 from flax.linen.module import nowrap
-
+from jax import numpy as jnp
 from sklearn.preprocessing import MinMaxScaler as MM
 
-import matplotlib.pyplot as plt
+import data
 from src.hank import NARXify
 from src.jacks import opt
 from src.metrics import rmse
 from src.tricks import timer
 
-import data
 key = jax.random.PRNGKey(0)
 
 # %% Basic RNN cell (not in linen for some reason?)
@@ -66,7 +64,7 @@ models = {
     "RNN": RNNCell,
     "LSTM": nn.LSTMCell,
     "OLSTM": nn.OptimizedLSTMCell,
-    "FIR_MLP":None
+    "FIR_MLP": None,
 }
 
 # %% Set or infer from batch job arrays
@@ -86,14 +84,15 @@ print(benchmark, model)
 # Not pretty but at least explicit
 
 
-
-config = {"LR": 1e-3, 
-          "n_re": 10, 
-          "n_hs": [2, 4, 8, 16, 32], 
-          "n_look": [2, 4, 8, 16, 32]}
-        #   "n_re": 1,       # testing
-        #   "n_hs": [8],     # testing
-        #   "n_look": [8]}  # testing
+config = {
+    "LR": 1e-3,
+    "n_re": 10,
+    "n_hs": [2, 4, 8, 16, 32],
+    "n_look": [2, 4, 8, 16, 32],
+}
+#   "n_re": 1,       # testing
+#   "n_hs": [8],     # testing
+#   "n_look": [8]}  # testing
 
 opts = {
     "CED1": {
@@ -182,15 +181,19 @@ def predict(params, model, dataset, look):
     ytrue = y_test.squeeze()
     return ytrue[:, None], yhat[:, None]
 
+
 def multi_predict(params, model, dataset, look):
     (X_test, y_test), _ = batch_data(dataset, config["batch_len"], look)
+
     @jax.pmap
     @jax.jit
     def prd(prms):
         yhat = model.apply(prms, X_test).squeeze()
         ytrue = y_test.squeeze()
         return ytrue[:, None], yhat[:, None]
+
     return prd(params)
+
 
 # %% Xval loop
 
@@ -201,7 +204,8 @@ for look in config["n_look"]:
 
     for nh in config["n_hs"]:
 
-        if model =='FIR_MLP':
+        if model == "FIR_MLP":
+
             class network(nn.Module):
                 @nn.compact
                 def __call__(self, x):
@@ -209,7 +213,8 @@ for look in config["n_look"]:
                     x = nn.tanh(x)
                     x = nn.Dense(1)(x)
                     return x
-        else: 
+
+        else:
             # Define model
             class network(nn.Module):
                 @nn.compact
@@ -217,7 +222,7 @@ for look in config["n_look"]:
                     x = nn.RNN(models[model](nh))(x)
                     x = nn.Dense(1)(x)
                     return x
-        
+
         try:
             # init model
             test_model = network()
@@ -228,28 +233,30 @@ for look in config["n_look"]:
                 thetas, histories = trainer(jax.random.split(k1, config["n_re"]))
             # predict on val set and score rmse
             ytrues, yhats = multi_predict(thetas, test_model, val, look)
-            scores = jnp.array([rmse(inv(a),inv(b)) for a,b in zip(ytrues, yhats)])
+            scores = jnp.array([rmse(inv(a), inv(b)) for a, b in zip(ytrues, yhats)])
             print(scores)
             # update best on val data
-            if (new_best:=jnp.min(scores)) < best:
+            if (new_best := jnp.min(scores)) < best:
                 best = new_best
                 best_idx = jnp.argmin(scores)
                 theta_star = theta_star = jax.tree_map(lambda a: a[best_idx], thetas)
                 xval = [best, nh, look, theta_star, test_model]
                 print(best, nh, look)
-        
-        except ValueError: # NaN, inf etc.
+
+        except ValueError:  # NaN, inf etc.
             continue
 # %% Evaluate best xval model
 
 best, nh, look, theta_star, xval_model = xval
 
-out = {'model':model,
-       'benchmark':benchmark,
-       'meta':config,
-       'nh_xval':nh,
-       'look_xval':look,
-       'theta':jax.tree_map(lambda x:x.tolist(), theta_star)}
+out = {
+    "model": model,
+    "benchmark": benchmark,
+    "meta": config,
+    "nh_xval": nh,
+    "look_xval": look,
+    "theta": jax.tree_map(lambda x: x.tolist(), theta_star),
+}
 
 for i, tst in enumerate(tests):
 
@@ -258,22 +265,22 @@ for i, tst in enumerate(tests):
     plt.figure()
     plt.plot(ytrue)
     plt.plot(yhat)
-    plt.plot(ytrue-yhat)
+    plt.plot(ytrue - yhat)
 
     RMSE = rmse(ytrue, yhat)
 
-    out[f'test_{i+1}'] = {'yhat':yhat.squeeze().tolist(),
-                          'rmse':RMSE}
+    out[f"test_{i+1}"] = {"yhat": yhat.squeeze().tolist(), "rmse": RMSE}
 
-    print(f'{benchmark} {model} test_{i+1} {RMSE:.3g}')
+    print(f"{benchmark} {model} test_{i+1} {RMSE:.3g}")
 
 # %% Save the results
+
 
 class Encoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, jnp.ndarray):
             return obj.tolist()
 
+
 with open(f"./data/{benchmark}_{model}_NN.json", "w") as f:
     json.dump(out, f, cls=Encoder)
-

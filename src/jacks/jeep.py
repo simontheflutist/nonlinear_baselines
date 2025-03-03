@@ -1,8 +1,7 @@
 # %%
 import jax
 import jax.numpy as jnp
-from jax.scipy.linalg import cho_solve, cho_factor
-
+from jax.scipy.linalg import cho_factor, cho_solve
 
 # ## helpers
 
@@ -31,15 +30,16 @@ def SE(a, b, theta):
 
 
 def Mat23(a, b, theta):
-    d = pd2(a, b)**0.5
+    d = pd2(a, b) ** 0.5
     t1 = jnp.sqrt(3) * d / theta["ll"] ** 2
     return theta["sf_m32"] * (1 + t1) * jnp.exp(-t1)
 
 
 def Mat52(a, b, theta):
-    d = pd2(a, b)**0.5
+    d = pd2(a, b) ** 0.5
     t1 = jnp.sqrt(5) * d / theta["ll"] ** 2
-    return theta["sf_m52"] * (1 + t1 + (t1**2)/3) * jnp.exp(-t1)
+    return theta["sf_m52"] * (1 + t1 + (t1**2) / 3) * jnp.exp(-t1)
+
 
 # %% GP helpers
 
@@ -80,5 +80,3 @@ def GP(X, Y, kernel, mu=lambda x: jnp.zeros((x.shape[0], 1))):
         return t1 + t2 + t3
 
     return train, predict_f, predict, nlml
-
-

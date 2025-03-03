@@ -1,5 +1,7 @@
 from itertools import chain, combinations_with_replacement
+
 import numpy as np
+
 
 def multicomb(iterable, r, empty=False):
     s = list(iterable)
@@ -64,10 +66,6 @@ def monomial(n):
     return np.eye(n)
 
 
-
-
 def get_basis(x, n, base=monomial):
     C = base(n)
     return (x[:, None] ** np.arange(n)) @ C, C
-
-

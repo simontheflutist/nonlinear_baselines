@@ -2,21 +2,19 @@
 import json
 from copy import deepcopy as dc
 
-import numpy as np
-import matplotlib.pyplot as plt
-
-
 import jax
 import jax.numpy as jnp
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.preprocessing import StandardScaler as SS
+
+from data import benchmarks_tvt
 from src import polys
 from src.hank import NARXify, predict
 from src.jacks import jeep, opt
 from src.linalg import stable_least_squares as SLS
 from src.metrics import AIC, nmse, rmse
 from src.tricks import timer
-from sklearn.preprocessing import StandardScaler as SS
-
-from data import benchmarks_tvt
 
 np.random.seed(0)
 key = jax.random.PRNGKey(0)
@@ -203,8 +201,8 @@ key, k1, k2, k3 = jax.random.split(key, 4)
 
 theta0 = {
     "sf_se": jnp.zeros((Nre, 1)),
-    "sn": jax.random.uniform(k2, minval=-5, maxval=0, shape=(Nre,1)),
-    "ll": jax.random.uniform(k3, minval=-3, maxval=2, shape=(Nre,1)),
+    "sn": jax.random.uniform(k2, minval=-5, maxval=0, shape=(Nre, 1)),
+    "ll": jax.random.uniform(k3, minval=-3, maxval=2, shape=(Nre, 1)),
 }
 
 
@@ -216,17 +214,17 @@ with timer():
         trn, F, _, nlml = jeep.GP(H, train.y[slc], jeep.SE)
 
     thetas, hists = jax.pmap(opt.optaximiser(nlml, num_iters=N_opt_GP, jit=1))(theta0)
-    
+
     # xvalidate on val set
     scores = []
     for i in range(Nre):
-        theta = {k:v[i] for k,v in thetas.items()}
+        theta = {k: v[i] for k, v in thetas.items()}
         state = trn(theta)
         YMPO, slcp = predict(*val, *lags, F, state, "MPO")
         score = rmse(inv(val.y[slcp]), inv(YMPO))
         scores.append(score)
-    
-    theta = {k:v[np.argmin(scores)] for k,v in thetas.items()}
+
+    theta = {k: v[np.argmin(scores)] for k, v in thetas.items()}
     state = trn(theta)  # get GP state with opt hyperameters
 
     plt.plot(hists.T)
@@ -296,7 +294,7 @@ with timer():
         key, k1 = jax.random.split(key, 2)
         theta_s, hists = trn(k1, nh)
         theta = opt.best(theta_s, hists)
-        plt.semilogy(hists.T)        
+        plt.semilogy(hists.T)
         Yhat, slcp = predict(*val, *lags, F, theta, "MPO")
         scores.append(nmse(inv(val.y[slcp]), inv(Yhat)))
         print(nh, scores[-1])

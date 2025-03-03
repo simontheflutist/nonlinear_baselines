@@ -54,7 +54,7 @@ def NARXify(X, Y, Xlags, Ylags):
     Hy, slcy = hank(Y, Ylags, include_tt=False)
     Hx, slcx = hank(X, Xlags, include_tt=True)
     if Hx.shape[0] <= Hy.shape[0]:
-        return np.hstack([Hy[slcx], Hx]), slcx  
+        return np.hstack([Hy[slcx], Hx]), slcx
     elif Hx.shape[0] > Hy.shape[0]:
         return np.hstack([Hy, Hx[slcy]]), slcy
 
@@ -84,4 +84,3 @@ def predict(Xp, Yp, x_lags, y_lags, F, theta, mode="MPO"):
     elif mode == "MPO":
         Yhat = marvin(Hp, Yp, y_lags, lambda h: F(h, theta))
     return Yhat[slc_p].reshape(-slc_p.start, -1), slc_p
-
